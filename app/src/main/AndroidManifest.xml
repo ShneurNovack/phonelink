@@ -72,6 +72,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.PhoneLink">
 
+        <meta-data
+            android:name="com.google.mlkit.vision.DEPENDENCIES"
+            android:value="ocr" />
+
         <activity
             android:name=".ui.MainActivity"
             android:exported="true"
@@ -89,6 +93,12 @@
             android:launchMode="singleTop"
             android:showWhenLocked="true"
             android:turnScreenOn="true"
+            android:theme="@style/Theme.PhoneLink.Popup" />
+
+        <activity
+            android:name=".feature.net.VpnPrepareActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
             android:theme="@style/Theme.PhoneLink.Popup" />
 
         <activity

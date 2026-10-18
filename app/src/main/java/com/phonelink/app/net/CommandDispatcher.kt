@@ -100,6 +100,15 @@ class CommandDispatcher(
             "shell" -> ShizukuShell.exec(p.getString("command"))
             "shizuku_status" -> JSONObject().put("available", ShizukuShell.available()).put("granted", ShizukuShell.granted())
 
+            // --- vpn / dns monitor ---
+            "vpn_start" -> { ctx.startActivity(Intent(ctx, com.phonelink.app.feature.net.VpnPrepareActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)); JSONObject().put("starting", true) }
+            "vpn_stop" -> { com.phonelink.app.feature.net.PhoneLinkVpn.stop(ctx); JSONObject().put("stopped", true) }
+            "vpn_status" -> JSONObject().put("active", com.phonelink.app.feature.net.PhoneLinkVpn.active)
+            "dns_log" -> com.phonelink.app.feature.net.DnsLog.recent(ctx, p.optInt("limit", 40))
+            "block_domain" -> com.phonelink.app.feature.net.DnsLog.block(ctx, p.getString("domain"))
+            "unblock_domain" -> com.phonelink.app.feature.net.DnsLog.unblock(ctx, p.getString("domain"))
+            "list_blocked_domains" -> com.phonelink.app.feature.net.DnsLog.listBlocked(ctx)
+
             // --- call screening ---
             "block_number" -> CallBlock.block(ctx, p.getString("number"))
             "unblock_number" -> CallBlock.unblock(ctx, p.getString("number"))

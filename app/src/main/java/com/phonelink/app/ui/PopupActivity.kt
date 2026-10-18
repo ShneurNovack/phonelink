@@ -45,8 +45,15 @@ class PopupActivity : AppCompatActivity() {
     }
 
     private fun addButton(row: LinearLayout, label: String, value: String?, promptId: String?) {
-        val b: Button = MaterialButton(this)
+        val b = MaterialButton(this)
         b.text = label
+        b.textSize = 16f
+        b.isAllCaps = false
+        b.cornerRadius = 0
+        b.elevation = 0f
+        b.stateListAnimator = null
+        b.insetTop = 0
+        b.insetBottom = 0
         b.setOnClickListener {
             if (promptId != null && value != null) {
                 PhoneLinkService.answerPrompt(promptId, value)
@@ -54,9 +61,11 @@ class PopupActivity : AppCompatActivity() {
             finish()
         }
         val lp = LinearLayout.LayoutParams(
-            ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT
+            ViewGroup.LayoutParams.MATCH_PARENT, dp(52)
         )
-        lp.marginStart = 16
+        if (row.childCount > 0) lp.topMargin = dp(10)
         row.addView(b, lp)
     }
+
+    private fun dp(v: Int): Int = (v * resources.displayMetrics.density).toInt()
 }

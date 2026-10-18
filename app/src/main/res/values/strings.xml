@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Phone Link</string>
+    <string name="accessibility_desc">Lets Rory see the screen and tap, type, swipe and scroll on this phone, the way it controls a browser. Only the owner\'s assistant, over the encrypted link you set up.</string>
 </resources>

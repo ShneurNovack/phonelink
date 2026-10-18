@@ -13,16 +13,20 @@ import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import com.phonelink.app.feature.Speaker
+import com.phonelink.app.feature.alarm.AlarmScheduler
+import com.phonelink.app.feature.sensors.ActivityTracker
 import com.phonelink.app.net.CommandDispatcher
 import com.phonelink.app.net.WsClient
 import com.phonelink.app.ui.MainActivity
 import com.phonelink.app.util.Prefs
+import java.util.concurrent.Executors
 import org.json.JSONObject
 
 /** Foreground service that holds the live link to the Worker and runs Rory's commands. */
 class PhoneLinkService : Service() {
 
     private val main = Handler(Looper.getMainLooper())
+    private val work = Executors.newSingleThreadExecutor()
     private lateinit var speaker: Speaker
     private lateinit var dispatcher: CommandDispatcher
     private var ws: WsClient? = null
@@ -71,11 +75,29 @@ class PhoneLinkService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (Prefs.enabled(this) && Prefs.isConfigured(this)) {
+            AlarmScheduler.rescheduleAll(this)
+            runCatching { ActivityTracker.start(this) }
+            KeepAlive.schedule(this)
             ensureConnected()
         } else {
+            KeepAlive.cancel(this)
             updateNotification(if (!Prefs.isConfigured(this)) "Not paired yet" else "Turned off")
         }
         return START_STICKY
+    }
+
+    /** User swiped the app out of recents: keep the link alive by relaunching the service. */
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        if (Prefs.enabled(this) && Prefs.isConfigured(this)) {
+            val restart = Intent(this, PhoneLinkService::class.java)
+            val pi = PendingIntent.getForegroundService(
+                this, 1, restart,
+                PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE
+            )
+            val am = getSystemService(Context.ALARM_SERVICE) as android.app.AlarmManager
+            am.set(android.app.AlarmManager.RTC, System.currentTimeMillis() + 1000, pi)
+        }
+        super.onTaskRemoved(rootIntent)
     }
 
     private fun ensureConnected() {
@@ -89,7 +111,7 @@ class PhoneLinkService : Service() {
             url = url,
             onOpen = { connected = true; main.post { updateNotification("Connected to Rory") } },
             onClosed = { connected = false; main.post { updateNotification("Reconnecting...") } },
-            onText = { msg -> main.post { onCommand(msg) } }
+            onText = { msg -> work.execute { onCommand(msg) } }
         ).also { it.start() }
     }
 

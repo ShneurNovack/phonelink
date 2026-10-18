@@ -61,6 +61,30 @@ class MainActivity : AppCompatActivity() {
                 .putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
             startActivity(i)
         }
+        findViewById<android.view.View>(R.id.permNotifAccess).setOnClickListener {
+            startActivity(Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS"))
+        }
+        findViewById<android.view.View>(R.id.permAccess).setOnClickListener {
+            startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+        }
+        findViewById<android.view.View>(R.id.permUsage).setOnClickListener {
+            startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
+        }
+        findViewById<android.view.View>(R.id.permRuntime).setOnClickListener {
+            requestPermissions(arrayOf(
+                android.Manifest.permission.READ_CALL_LOG,
+                android.Manifest.permission.CALL_PHONE,
+                android.Manifest.permission.ANSWER_PHONE_CALLS,
+                android.Manifest.permission.READ_PHONE_STATE,
+                android.Manifest.permission.READ_SMS,
+                android.Manifest.permission.SEND_SMS,
+                android.Manifest.permission.RECEIVE_SMS,
+                android.Manifest.permission.ACCESS_FINE_LOCATION,
+                android.Manifest.permission.ACCESS_COARSE_LOCATION,
+                android.Manifest.permission.ACTIVITY_RECOGNITION,
+                android.Manifest.permission.BLUETOOTH_CONNECT
+            ), 1001)
+        }
         findViewById<TextView>(R.id.clearLog).setOnClickListener {
             ActionLog.clear(this); refreshLog()
         }
@@ -69,6 +93,8 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         ActionLog.addListener(logListener)
+        // Keep the link running whenever the owner has it on and it's paired.
+        if (Prefs.enabled(this) && Prefs.isConfigured(this)) PhoneLinkService.start(this)
         refreshStatus(); refreshPerms(); refreshLog()
     }
 

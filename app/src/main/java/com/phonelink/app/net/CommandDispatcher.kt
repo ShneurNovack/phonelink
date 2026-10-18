@@ -9,7 +9,6 @@ import com.phonelink.app.feature.MediaVolume
 import com.phonelink.app.feature.Speaker
 import com.phonelink.app.feature.SystemOps
 import com.phonelink.app.feature.access.ScreenControlService
-import com.phonelink.app.feature.alarm.Alarms
 import com.phonelink.app.feature.comms.CallsSms
 import com.phonelink.app.feature.notif.MediaSessions
 import com.phonelink.app.feature.notif.NotifListener
@@ -36,19 +35,13 @@ class CommandDispatcher(
             "set_volume" -> MediaVolume.setVolume(ctx, p.optString("stream", "media"), p.optInt("level", 50))
             "media_control" -> mediaControl(p.optString("action", "toggle"))
             "now_playing" -> MediaSessions.nowPlaying(ctx)
-            "set_alarm" -> AlarmsTimers.setAlarm(ctx, p.getInt("hour"), p.getInt("minute"), p.optString("label"))
+            "set_alarm", "alarm_add" -> AlarmsTimers.setAlarm(ctx, p.getInt("hour"), p.getInt("minute"), p.optString("label"), p.opt("days"), p.optBoolean("vibrate", true))
             "set_timer" -> AlarmsTimers.setTimer(ctx, p.getInt("seconds"), p.optString("label"))
+            "show_alarms" -> AlarmsTimers.showAlarms(ctx)
             "open_app" -> AlarmsTimers.openApp(ctx, p.getString("package"))
             "open_url" -> AlarmsTimers.openUrl(ctx, p.getString("url"))
             "speak" -> speaker.speak(p.getString("text"))
             "show_popup" -> showPopup(p)
-
-            // --- alarms (Phone Link's own) ---
-            "alarm_list" -> Alarms.list(ctx)
-            "alarm_add" -> Alarms.add(ctx, p)
-            "alarm_update" -> Alarms.update(ctx, p)
-            "alarm_delete" -> Alarms.delete(ctx, p.getInt("id"))
-            "alarm_toggle" -> Alarms.toggle(ctx, p.getInt("id"), p.getBoolean("enabled"))
 
             // --- notifications ---
             "notif_list" -> NotifListener.list(p.optBoolean("includeOngoing", false))

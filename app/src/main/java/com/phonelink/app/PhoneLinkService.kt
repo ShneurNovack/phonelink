@@ -13,7 +13,6 @@ import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import com.phonelink.app.feature.Speaker
-import com.phonelink.app.feature.alarm.AlarmScheduler
 import com.phonelink.app.feature.sensors.ActivityTracker
 import com.phonelink.app.net.CommandDispatcher
 import com.phonelink.app.net.WsClient
@@ -75,7 +74,6 @@ class PhoneLinkService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (Prefs.enabled(this) && Prefs.isConfigured(this)) {
-            AlarmScheduler.rescheduleAll(this)
             runCatching { ActivityTracker.start(this) }
             KeepAlive.schedule(this)
             ensureConnected()

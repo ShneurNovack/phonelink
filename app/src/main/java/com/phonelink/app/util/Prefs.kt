@@ -27,4 +27,8 @@ object Prefs {
 
     fun isConfigured(ctx: Context): Boolean =
         wsUrl(ctx).isNotEmpty() && deviceKey(ctx).isNotEmpty()
+
+    /** Whether the owner wants the DNS monitor on (so it restarts after reboot). */
+    fun vpnEnabled(ctx: Context): Boolean = sp(ctx).getBoolean("vpn_enabled", false)
+    fun setVpnEnabled(ctx: Context, v: Boolean) = sp(ctx).edit().putBoolean("vpn_enabled", v).apply()
 }

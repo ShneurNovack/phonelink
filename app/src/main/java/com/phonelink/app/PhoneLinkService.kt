@@ -76,6 +76,9 @@ class PhoneLinkService : Service() {
         if (Prefs.enabled(this) && Prefs.isConfigured(this)) {
             runCatching { ActivityTracker.start(this) }
             runCatching { com.phonelink.app.feature.media.Screenshots.start(this) }
+            if (Prefs.vpnEnabled(this) && !com.phonelink.app.feature.net.PhoneLinkVpn.active) {
+                runCatching { com.phonelink.app.feature.net.PhoneLinkVpn.start(this) }
+            }
             KeepAlive.schedule(this)
             ensureConnected()
         } else {

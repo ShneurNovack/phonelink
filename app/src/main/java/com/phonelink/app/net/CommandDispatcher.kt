@@ -9,8 +9,14 @@ import com.phonelink.app.feature.MediaVolume
 import com.phonelink.app.feature.Speaker
 import com.phonelink.app.feature.SystemOps
 import com.phonelink.app.feature.access.ScreenControlService
+import com.phonelink.app.feature.comms.CallBlock
 import com.phonelink.app.feature.comms.CallsSms
+import com.phonelink.app.feature.media.MediaFiles
+import com.phonelink.app.feature.media.Screenshots
 import com.phonelink.app.feature.notif.MediaSessions
+import com.phonelink.app.feature.ocr.Ocr
+import com.phonelink.app.feature.sys.SettingsControl
+import com.phonelink.app.feature.sys.ShizukuShell
 import com.phonelink.app.feature.notif.NotifListener
 import com.phonelink.app.feature.sensors.ActivityTracker
 import com.phonelink.app.feature.sensors.Sensors
@@ -75,6 +81,30 @@ class CommandDispatcher(
             "input_text" -> ScreenControlService.inputText(p.getString("text"))
             "tap_text" -> ScreenControlService.tapText(p.getString("text"))
             "global_action" -> ScreenControlService.global(p.getString("action"))
+
+            // --- screenshots (auto-OCR log) ---
+            "shots_list" -> Screenshots.list(ctx, p.optInt("limit", 20))
+            "shots_read" -> Screenshots.read(ctx, p.optLong("id", 0))
+            "shots_search" -> Screenshots.search(ctx, p.getString("query"))
+
+            // --- media + files + ocr ---
+            "media_list" -> MediaFiles.listMedia(ctx, p.optString("type", "images"), p.optInt("limit", 30), p.optString("query").ifBlank { null })
+            "photo_view" -> MediaFiles.viewPhoto(ctx, p.getLong("id"), p.optInt("maxWidth", 900))
+            "files_list" -> MediaFiles.listDir(p.optString("path").ifBlank { null })
+            "ocr_image" -> JSONObject().put("text", Ocr.fromFile(p.getString("path")))
+
+            // --- settings + shell (Shizuku) ---
+            "setting_get" -> SettingsControl.get(ctx, p.optString("namespace", "secure"), p.getString("key"))
+            "setting_put" -> SettingsControl.put(ctx, p.optString("namespace", "secure"), p.getString("key"), p.getString("value"))
+            "toggle" -> SettingsControl.quickToggle(p.getString("name"), p.getBoolean("on"))
+            "shell" -> ShizukuShell.exec(p.getString("command"))
+            "shizuku_status" -> JSONObject().put("available", ShizukuShell.available()).put("granted", ShizukuShell.granted())
+
+            // --- call screening ---
+            "block_number" -> CallBlock.block(ctx, p.getString("number"))
+            "unblock_number" -> CallBlock.unblock(ctx, p.getString("number"))
+            "list_blocked" -> CallBlock.listBlocked(ctx)
+            "screened_calls" -> CallBlock.recent(ctx)
 
             // --- system ---
             "list_apps" -> SystemOps.listApps(ctx, p.optBoolean("onlyLaunchable", true))

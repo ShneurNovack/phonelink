@@ -75,6 +75,7 @@ class PhoneLinkService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (Prefs.enabled(this) && Prefs.isConfigured(this)) {
             runCatching { ActivityTracker.start(this) }
+            runCatching { com.phonelink.app.feature.media.Screenshots.start(this) }
             KeepAlive.schedule(this)
             ensureConnected()
         } else {
